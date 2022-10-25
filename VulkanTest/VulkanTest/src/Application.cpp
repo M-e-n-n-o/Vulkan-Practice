@@ -30,9 +30,10 @@ void Application::loadModels()
 {
 	std::vector<Model::Vertex> vertices
 	{
-		{{0.0f, -0.5f}},
-		{{0.5f, 0.5f}},
-		{{-0.5f, 0.5f}}
+		// Position     Color
+		{{0.0f, -0.5f}, {1, 0, 0}},
+		{{0.5f, 0.5f}, {0, 1, 0}},
+		{{-0.5f, 0.5f}, {0, 0, 1}}
 	};
 
 	m_model = std::make_unique<Model>(m_device, vertices);
