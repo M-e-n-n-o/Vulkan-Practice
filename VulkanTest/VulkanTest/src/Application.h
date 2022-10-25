@@ -4,6 +4,7 @@
 #include "Pipeline.h"
 #include "Device.h"
 #include "SwapChain.h"
+#include "Model.h"
 
 #include <memory>
 #include <vector>
@@ -21,7 +22,9 @@ private:
 	
 	std::unique_ptr<Pipeline> m_pipeline;
 	VkPipelineLayout m_pipelineLayout;
-	std::vector<VkCommandBuffer> m_commandBuffer;
+	std::vector<VkCommandBuffer> m_commandBuffers;
+
+	std::unique_ptr<Model> m_model;
 
 public:
 	Application();
@@ -33,6 +36,7 @@ public:
 	void run();
 
 private:
+	void loadModels();
 	void createPipelineLayout();
 	void createPipeline();
 	void createCommandBuffers();

@@ -98,6 +98,14 @@
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.224.1\Lib;C:\Users\Dell\Documents\School\Vulkan-Practice\Libraries\glfw\lib-vc2019</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3dll.lib</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.vert -o shaders\simple.vert.spv
+C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.frag -o shaders\simple.frag.spv</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -119,6 +127,14 @@
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.224.1\Lib;C:\Users\Dell\Documents\School\Vulkan-Practice\Libraries\glfw\lib-vc2019</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3dll.lib</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.vert -o shaders\simple.vert.spv
+C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.frag -o shaders\simple.frag.spv</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -136,6 +152,14 @@
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.224.1\Lib;C:\Users\Dell\Documents\School\Vulkan-Practice\Libraries\glfw\lib-vc2019</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3dll.lib</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.vert -o shaders\simple.vert.spv
+C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.frag -o shaders\simple.frag.spv</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -157,11 +181,20 @@
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.224.1\Lib;C:\Users\Dell\Documents\School\Vulkan-Practice\Libraries\glfw\lib-vc2019</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3dll.lib</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.vert -o shaders\simple.vert.spv
+C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.frag -o shaders\simple.frag.spv</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Device.cpp" />
+    <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Pipeline.cpp" />
     <ClCompile Include="src\SwapChain.cpp" />
     <ClCompile Include="src\Window.cpp" />
@@ -169,6 +202,7 @@
   <ItemGroup>
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\Device.h" />
+    <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Pipeline.h" />
     <ClInclude Include="src\SwapChain.h" />
     <ClInclude Include="src\Window.h" />

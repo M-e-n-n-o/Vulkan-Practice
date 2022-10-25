@@ -1,4 +1,5 @@
 #include "Pipeline.h"
+#include "Model.h"
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
@@ -32,12 +33,14 @@ Pipeline::Pipeline(Device& device, const std::string& vertexFilePath, const std:
 	shaderStages[1].pNext = nullptr;
 	shaderStages[1].pSpecializationInfo = nullptr;
 
+	auto attributeDescriptions = Model::Vertex::getAttributeDescriptions();
+	auto bindingDescriptions = Model::Vertex::getBindingDescriptions();
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-	vertexInputInfo.pVertexBindingDescriptions = nullptr;
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+	vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+	vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -71,6 +74,11 @@ Pipeline::~Pipeline()
 	vkDestroyShaderModule(m_device.device(), m_vertShaderModule, nullptr);
 	vkDestroyShaderModule(m_device.device(), m_fragShaderModule, nullptr);
 	vkDestroyPipeline(m_device.device(), m_graphicsPipeline, nullptr);
+}
+
+void Pipeline::bind(VkCommandBuffer commandBuffer)
+{
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 }
 
 void Pipeline::DefaultPipelineConfigInfo(PipelineConfigInfo& configInfo, uint32_t width, uint32_t height)
