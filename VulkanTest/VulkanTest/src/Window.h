@@ -12,6 +12,7 @@ private:
 
 	unsigned int m_width;
 	unsigned int m_height;
+	bool m_framebufferResized = false;
 
 public:
 	Window(const std::string& windowName, int width, int height);
@@ -26,4 +27,10 @@ public:
 
 	bool shouldClose();
 	VkExtent2D getExtent() { return { static_cast<uint32_t>(m_width), static_cast<uint32_t>(m_height) }; }
+
+	bool wasWindowResized() { return m_framebufferResized; }
+	void resetWindowResizedFlag() { m_framebufferResized = false; }
+
+private:
+	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 };

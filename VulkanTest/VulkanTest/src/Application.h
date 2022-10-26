@@ -18,7 +18,7 @@ public:
 private:
 	Window m_window{ "Vulkan practice", WIDTH, HEIGHT };
 	Device m_device{ m_window };
-	SwapChain m_swapChain{ m_device, m_window.getExtent() };
+	std::unique_ptr<SwapChain> m_swapChain;
 	
 	std::unique_ptr<Pipeline> m_pipeline;
 	VkPipelineLayout m_pipelineLayout;
@@ -38,7 +38,10 @@ public:
 private:
 	void loadModels();
 	void createPipelineLayout();
+	void recreateSwapChain();
 	void createPipeline();
 	void createCommandBuffers();
+	void recordCommandBuffer(int imageIndex);
+	void freeCommandBuffers();
 	void drawFrame();
 };
