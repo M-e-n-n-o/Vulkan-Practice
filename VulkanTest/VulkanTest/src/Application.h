@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Window.h"
-#include "Pipeline.h"
 #include "Device.h"
-#include "SwapChain.h"
 #include "GameObject.h"
+#include "Renderer.h"
 
 #include <memory>
 #include <vector>
@@ -18,11 +17,7 @@ public:
 private:
 	Window m_window{ "Vulkan practice", WIDTH, HEIGHT };
 	Device m_device{ m_window };
-	std::unique_ptr<SwapChain> m_swapChain;
-	
-	std::unique_ptr<Pipeline> m_pipeline;
-	VkPipelineLayout m_pipelineLayout;
-	std::vector<VkCommandBuffer> m_commandBuffers;
+	Renderer m_renderer{ m_window, m_device };
 
 	std::vector<GameObject> m_gameObjects;
 
@@ -37,12 +32,4 @@ public:
 
 private:
 	void loadGameObjects();
-	void createPipelineLayout();
-	void recreateSwapChain();
-	void createPipeline();
-	void createCommandBuffers();
-	void recordCommandBuffer(int imageIndex);
-	void freeCommandBuffers();
-	void drawFrame();
-	void renderGameObjects(VkCommandBuffer commandBuffer);
 };

@@ -196,6 +196,8 @@ C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.frag -o shaders\simple.frag.
     <ClCompile Include="src\Device.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Pipeline.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\SimpleRenderSystem.cpp" />
     <ClCompile Include="src\SwapChain.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
@@ -205,6 +207,8 @@ C:\VulkanSDK\1.3.224.1\Bin\glslc.exe shaders\simple.frag -o shaders\simple.frag.
     <ClInclude Include="src\GameObject.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Pipeline.h" />
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\SimpleRenderSystem.h" />
     <ClInclude Include="src\SwapChain.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
