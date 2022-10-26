@@ -5,16 +5,18 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 struct SimplePushConstantData
 {
+	glm::mat2 transform{ 1.0f };
 	glm::vec2 offset;
 	alignas(16) glm::vec3 color;
 };
 
 Application::Application()
 {
-	loadModels();
+	loadGameObjects();
 	createPipelineLayout();
 	recreateSwapChain();
 	createCommandBuffers();
@@ -36,17 +38,40 @@ void Application::run()
 	vkDeviceWaitIdle(m_device.device());
 }
 
-void Application::loadModels()
+void Application::loadGameObjects()
 {
 	std::vector<Model::Vertex> vertices
 	{
-		// Position     Color
-		{{0.0f, -0.5f}, {1, 0, 0}},
-		{{0.5f, 0.5f}, {0, 1, 0}},
-		{{-0.5f, 0.5f}, {0, 0, 1}}
+		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}} 
 	};
 
-	m_model = std::make_unique<Model>(m_device, vertices);
+	auto lveModel = std::make_shared<Model>(m_device, vertices);
+
+	std::vector<glm::vec3> colors
+	{
+		{1.f, .7f, .73f},
+		{1.f, .87f, .73f},
+		{1.f, 1.f, .73f},
+		{.73f, 1.f, .8f},
+		{.73, .88f, 1.f}
+	};
+
+	for (auto& color : colors) 
+	{
+		color = glm::pow(color, glm::vec3{ 2.2f });
+	}
+
+	for (int i = 0; i < 40; i++) 
+	{
+		auto triangle = GameObject::CreateGameObject();
+		triangle.m_model = lveModel;
+		triangle.m_transform2D.scale = glm::vec2(.5f) + i * 0.025f;
+		triangle.m_transform2D.rotation = i * glm::pi<float>() * .025f;
+		triangle.m_color = colors[i % colors.size()];
+		m_gameObjects.push_back(std::move(triangle));
+	}
 }
 
 void Application::createPipelineLayout()
@@ -133,9 +158,6 @@ void Application::createCommandBuffers()
 
 void Application::recordCommandBuffer(int imageIndex)
 {
-	static int frame = 0;
-	frame = (frame + 1) % 1000;
-
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -153,7 +175,7 @@ void Application::recordCommandBuffer(int imageIndex)
 	renderPassInfo.renderArea.extent = m_swapChain->getSwapChainExtent();
 
 	std::array<VkClearValue, 2> clearValues{};
-	clearValues[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
+	clearValues[0].color = { 0.05f, 0.05f, 0.05f, 1.0f };
 	clearValues[1].depthStencil = { 1.0f, 0 };
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
@@ -173,24 +195,7 @@ void Application::recordCommandBuffer(int imageIndex)
 	VkRect2D scissor{ {0, 0}, m_swapChain->getSwapChainExtent() };
 	vkCmdSetScissor(m_commandBuffers[imageIndex], 0, 1, &scissor);
 
-	m_pipeline->bind(m_commandBuffers[imageIndex]);
-	m_model->bind(m_commandBuffers[imageIndex]);
-
-	for (int j = 0; j < 4; j++)
-	{
-		SimplePushConstantData push{};
-		push.offset = { -0.5f + frame * 0.02f, -0.4f + j * 0.25f };
-		push.color = { 0.0f, 0.0f, 0.2f + 0.2f * j };
-
-		vkCmdPushConstants(m_commandBuffers[imageIndex],
-			m_pipelineLayout,
-			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-			0,
-			sizeof(SimplePushConstantData),
-			&push);
-
-		m_model->draw(m_commandBuffers[imageIndex]);
-	}
+	renderGameObjects(m_commandBuffers[imageIndex]);
 
 	vkCmdEndRenderPass(m_commandBuffers[imageIndex]);
 
@@ -198,6 +203,39 @@ void Application::recordCommandBuffer(int imageIndex)
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error("Failed to record command buffer");
+	}
+}
+
+void Application::renderGameObjects(VkCommandBuffer commandBuffer)
+{
+	// update
+	int i = 0;
+	for (auto& obj : m_gameObjects) 
+	{
+		i += 1;
+		obj.m_transform2D.rotation =
+			glm::mod<float>(obj.m_transform2D.rotation + 0.001f * i, 2.f * glm::pi<float>());
+	}
+
+	// render
+	m_pipeline->bind(commandBuffer);
+	for (auto& obj : m_gameObjects) 
+	{
+		SimplePushConstantData push{};
+		push.offset = obj.m_transform2D.translation;
+		push.color = obj.m_color;
+		push.transform = obj.m_transform2D.mat2();
+
+		vkCmdPushConstants(
+			commandBuffer,
+			m_pipelineLayout,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+			0,
+			sizeof(SimplePushConstantData),
+			&push);
+
+		obj.m_model->bind(commandBuffer);
+		obj.m_model->draw(commandBuffer);
 	}
 }
 
