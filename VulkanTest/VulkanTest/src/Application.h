@@ -4,6 +4,7 @@
 #include "Device.h"
 #include "GameObject.h"
 #include "Renderer.h"
+#include "Descriptor.h"
 
 #include <memory>
 #include <vector>
@@ -18,6 +19,8 @@ private:
 	Window m_window{ "Vulkan practice", WIDTH, HEIGHT };
 	Device m_device{ m_window };
 	Renderer m_renderer{ m_window, m_device };
+
+	std::unique_ptr<DescriptorPool> m_globalPool{};  
 
 	std::vector<GameObject> m_gameObjects;
 

@@ -10,13 +10,13 @@
 // Vulkan only guarantees 128bytes of space for the push constant (that is 2x mat4)
 struct SimplePushConstantData
 {
-	glm::mat4 transform{ 1.0f };
+	glm::mat4 modelMatrix{ 1.0f };
 	glm::mat4 normalMatrix{ 1.0f };
 };
 
-SimpleRenderSystem::SimpleRenderSystem(Device& device, VkRenderPass renderPass): m_device(device)
+SimpleRenderSystem::SimpleRenderSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout): m_device(device)
 {
-	createPipelineLayout();
+	createPipelineLayout(globalSetLayout);
 	createPipeline(renderPass);
 }
 
@@ -25,17 +25,19 @@ SimpleRenderSystem::~SimpleRenderSystem()
 	vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
 }
 
-void SimpleRenderSystem::createPipelineLayout()
+void SimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
 {
 	VkPushConstantRange pushConstantRange{};
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 	pushConstantRange.offset = 0;
 	pushConstantRange.size = sizeof(SimplePushConstantData);
 
+	std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 0;
-	pipelineLayoutInfo.pSetLayouts = nullptr;
+	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+	pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
@@ -63,13 +65,20 @@ void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<Gam
 {
 	m_pipeline->bind(frameInfo.commandBuffer);
 
-	auto projectionView = frameInfo.camera.getProjectionMatrix() * frameInfo.camera.getViewMatrix();
+	vkCmdBindDescriptorSets(
+		frameInfo.commandBuffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		m_pipelineLayout,
+		0,
+		1,
+		&frameInfo.globalDescriptorSet,
+		0,
+		nullptr);
 
 	for (auto& obj : gameObjects)
 	{
 		SimplePushConstantData push{};
-		auto modelMatrix = obj.transform.getTransformationMatrix();
-		push.transform = projectionView * modelMatrix;
+		push.modelMatrix = obj.transform.getTransformationMatrix();
 		push.normalMatrix = obj.transform.getNormalMatrix();
 
 		vkCmdPushConstants(
