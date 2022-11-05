@@ -7,10 +7,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
+// Vulkan only guarantees 128bytes of space for the push constant (that is 2x mat4)
 struct SimplePushConstantData
 {
 	glm::mat4 transform{ 1.0f };
-	alignas(16) glm::vec3 color;
+	glm::mat4 normalMatrix{ 1.0f };
 };
 
 SimpleRenderSystem::SimpleRenderSystem(Device& device, VkRenderPass renderPass): m_device(device)
@@ -58,27 +59,28 @@ void SimpleRenderSystem::createPipeline(VkRenderPass renderPass)
 	m_pipeline = std::make_unique<Pipeline>(m_device, "shaders/simple.vert.spv", "shaders/simple.frag.spv", pipelineConfig);
 }
 
-void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera)
+void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects)
 {
-	m_pipeline->bind(commandBuffer);
+	m_pipeline->bind(frameInfo.commandBuffer);
 
-	auto projectionView = camera.getProjectionMatrix() * camera.getViewMatrix();
+	auto projectionView = frameInfo.camera.getProjectionMatrix() * frameInfo.camera.getViewMatrix();
 
 	for (auto& obj : gameObjects)
 	{
 		SimplePushConstantData push{};
-		push.color = obj.color;
-		push.transform = projectionView * obj.transform.getTransformationMatrix();
+		auto modelMatrix = obj.transform.getTransformationMatrix();
+		push.transform = projectionView * modelMatrix;
+		push.normalMatrix = obj.transform.getNormalMatrix();
 
 		vkCmdPushConstants(
-			commandBuffer,
+			frameInfo.commandBuffer,
 			m_pipelineLayout,
 			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 			0,
 			sizeof(SimplePushConstantData),
 			&push);
 
-		obj.model->bind(commandBuffer);
-		obj.model->draw(commandBuffer);
+		obj.model->bind(frameInfo.commandBuffer);
+		obj.model->draw(frameInfo.commandBuffer);
 	}
 }
