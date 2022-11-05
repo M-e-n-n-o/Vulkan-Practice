@@ -1,9 +1,11 @@
 #include "Application.h"
 #include "SimpleRenderSystem.h"
 #include "Camera.h"
+#include "KeyBoardMovementController.h"
 
 #include <stdexcept>
 #include <array>
+#include <chrono>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -17,7 +19,7 @@ Application::Application()
 
 Application::~Application()
 {
-	
+
 }
 
 void Application::run()
@@ -26,14 +28,25 @@ void Application::run()
 
 	Camera camera{};
 	//camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
-	camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 20.0f), glm::vec3(0.0f, 0.0f, 2.5f));
+	//camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 20.0f), glm::vec3(0.0f, 0.0f, 2.5f));
+
+	auto viewerObject = GameObject::CreateGameObject();
+	KeyboardMovementController cameraController{};
+
+	auto currentTime = std::chrono::high_resolution_clock::now();
 
 	while (!m_window.shouldClose())
 	{
 		m_window.update();
 		
+		auto newTime = std::chrono::high_resolution_clock::now();
+		float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+		currentTime = newTime;
+
+		cameraController.moveInPlaneXZ(m_window.getNativeWindow(), frameTime, viewerObject);
+		camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+
 		float aspect = m_renderer.getAspectRatio();
-		//camera.setOrthographicsProjection(-aspect, aspect, -1, 1, -1, 1);
 		camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
 		auto commandBuffer = m_renderer.beginFrame();
@@ -119,10 +132,10 @@ void Application::loadGameObjects()
 	std::shared_ptr<Model> model = CreateCubeModel(m_device, { 0.0f, 0.0f, 0.0f });
 
 	auto cube = GameObject::CreateGameObject();
-	cube.m_model = model;
-	cube.m_transform.translation = { 0.0f, 0.0f, 2.5f };
-	cube.m_transform.rotation = { 0.125f * glm::two_pi<float>(), 0, 0 };
-	cube.m_transform.scale = { 0.5f, 0.5f, 0.5f };
+	cube.model = model;
+	cube.transform.translation = { 0.0f, 0.0f, 2.5f };
+	cube.transform.rotation = { 0.125f * glm::two_pi<float>(), 0, 0 };
+	cube.transform.scale = { 0.5f, 0.5f, 0.5f };
 
 	m_gameObjects.push_back(std::move(cube));
 }

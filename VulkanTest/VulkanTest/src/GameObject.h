@@ -60,10 +60,10 @@ class GameObject
 public:
 	using id_t = unsigned int;
 
-	std::shared_ptr<Model> m_model;
-	glm::vec3 m_color{};
+	std::shared_ptr<Model> model;
+	glm::vec3 color{};
 
-	TransformComponent m_transform{};
+	TransformComponent transform{};
 
 private:
 	id_t m_id;

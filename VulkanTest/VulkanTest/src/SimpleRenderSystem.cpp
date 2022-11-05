@@ -66,11 +66,9 @@ void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::v
 
 	for (auto& obj : gameObjects)
 	{
-		obj.m_transform.rotation.y = glm::mod(obj.m_transform.rotation.y + 0.01f, glm::two_pi<float>());
-
 		SimplePushConstantData push{};
-		push.color = obj.m_color;
-		push.transform = projectionView * obj.m_transform.getTransformationMatrix();
+		push.color = obj.color;
+		push.transform = projectionView * obj.transform.getTransformationMatrix();
 
 		vkCmdPushConstants(
 			commandBuffer,
@@ -80,7 +78,7 @@ void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::v
 			sizeof(SimplePushConstantData),
 			&push);
 
-		obj.m_model->bind(commandBuffer);
-		obj.m_model->draw(commandBuffer);
+		obj.model->bind(commandBuffer);
+		obj.model->draw(commandBuffer);
 	}
 }
