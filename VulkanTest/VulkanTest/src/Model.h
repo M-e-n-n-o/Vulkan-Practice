@@ -17,17 +17,28 @@ private:
 	VkDeviceMemory m_vertexBufferMemory;
 	uint32_t m_vertexCount;
 
+	bool m_hasIndexBuffer = false;
+	VkBuffer m_indexBuffer;
+	VkDeviceMemory m_indexBufferMemory;
+	uint32_t m_indexCount;
+
 public:
 	struct Vertex
 	{
-		glm::vec3 position;
-		glm::vec3 color;
+		glm::vec3 position{};
+		glm::vec3 color{};
 
 		static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
 		static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 	};
 
-	Model(Device& device, const std::vector<Vertex>& vertices);
+	struct Data
+	{
+		std::vector<Vertex> vertices{};
+		std::vector<uint32_t> indices{};
+	};
+
+	Model(Device& device, const Data& data);
 	~Model();
 
 	Model(const Model&) = delete;
@@ -37,5 +48,6 @@ public:
 	void draw(VkCommandBuffer commandBuffer);
 
 private:
-	void createVertexBuffers(const std::vector<Vertex>& vertices);
+	void createVertexBuffer(const std::vector<Vertex>& vertices);
+	void createIndexBuffer(const std::vector<uint32_t>& indices);
 };
